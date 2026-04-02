@@ -22,9 +22,21 @@ namespace EleicaoBrasilApi.Controllers
         }
         [HttpGet]
 
-        public IActionResult Get()
+        public IActionResult Getodos()
         {
             var candidatos = _context.Candidatos.ToList();
+            return Ok(candidatos);
+        }
+
+        [HttpGet("Partido/{Partido}")]
+        public IActionResult Get(string Partido)
+        {
+            var candidatos = _context.Candidatos.Where(c => c.Partido.Trim().ToLower() == Partido).ToList();
+            if (!candidatos.Any())
+            {
+                return NotFound("Nenhum candidato nesse partido.");          
+            }
+
             return Ok(candidatos);
         }
 
@@ -32,6 +44,12 @@ namespace EleicaoBrasilApi.Controllers
 
         public IActionResult Post(Candidato candidato)
         {
+            if(_context.Candidatos.Any(c => c.Numero == candidato.Numero))
+            {
+                return BadRequest("Já existe um candidato com esse número");
+                
+            }
+             
             _context.Candidatos.Add(candidato);
             _context.SaveChanges();
             return CreatedAtAction(nameof(Get), new { id = candidato.Id}, candidato);
